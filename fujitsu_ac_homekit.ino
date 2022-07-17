@@ -1,3 +1,23 @@
+/*
+ * HomeKit Remote control for old Fujitsu AC via Infrared
+ * 
+ * hadware list:
+ * controller: NodeMCU v2
+ * transistor: BC547 
+ * ir led: TSAL6100 
+ * temperature sensor: DHT11
+ *
+ * credits to https://blog.judgelight.xyz/2022/06/arduinoesp8266%E5%BC%80%E5%8F%91homekit%E5%85%A5%E9%97%A8%E6%8C%87%E5%8D%97/
+ */
+
+#include <Arduino.h>
+#include <ESP8266WiFi.h>
+#include <arduino_homekit_server.h>
+#include <IRremoteESP8266.h>
+#include <ir_Fujitsu.h>
+#include <DHT.h>
+#include "wifi_info.h"
+
 #define LOG_D(fmt, ...)   printf_P(PSTR(fmt "\n") , ##__VA_ARGS__);
 
 extern "C" homekit_server_config_t accessory_config;
