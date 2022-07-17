@@ -10,7 +10,12 @@ homekit_characteristic_t ACName = HOMEKIT_CHARACTERISTIC_(NAME, "Fujitsu_AC");
 homekit_characteristic_t currentHeatingCoolingState = HOMEKIT_CHARACTERISTIC_(CURRENT_HEATING_COOLING_STATE, 0);
 homekit_characteristic_t targetHeatingCoolingState = HOMEKIT_CHARACTERISTIC_(TARGET_HEATING_COOLING_STATE, 0);
 homekit_characteristic_t currentTemperature = HOMEKIT_CHARACTERISTIC_(CURRENT_TEMPERATURE, 24.0);
-homekit_characteristic_t targetTemperature = HOMEKIT_CHARACTERISTIC_(TARGET_TEMPERATURE, 24.0);
+homekit_characteristic_t targetTemperature = HOMEKIT_CHARACTERISTIC_(
+    TARGET_TEMPERATURE, 24.0,
+    .min_value = (float[]) {18},
+    .max_value = (float[]) {30},
+    .min_step = (float[]) {1},
+);
 homekit_characteristic_t temperatureDisplayUnit = HOMEKIT_CHARACTERISTIC_(TEMPERATURE_DISPLAY_UNITS, 0);
 homekit_characteristic_t currentRelativeHumidity = HOMEKIT_CHARACTERISTIC_(CURRENT_RELATIVE_HUMIDITY, 50.0);
  
