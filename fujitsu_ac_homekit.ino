@@ -14,7 +14,6 @@
 #include <ESP8266WiFi.h>
 #include <arduino_homekit_server.h>
 #include <IRremoteESP8266.h>
-#include <IRsend.h>
 #include <ir_Fujitsu.h>
 #include <DHT.h>
 #include "wifi_info.h"
@@ -44,8 +43,6 @@ void ACModeSetter(const homekit_value_t value)
     updateac();
 }
  
-
- 
 void temperatureDisplayUnitSetter(const homekit_value_t value)
 {
     temperatureDisplayUnit.value.uint8_value = value.uint8_value;
@@ -54,13 +51,17 @@ void temperatureDisplayUnitSetter(const homekit_value_t value)
  
 void updateac()
 {
+    float targetTemperatureBuffer = targetTemperature.value.float_value;
+
+    int state = round(targetHeatingCoolingState.value.uint8_value);
+
     //cast and set max and min temperature like the original remote
-    int targetTemp = round(targetTemperature.value.float_value);
+    int targetTemp = round(targetTemperatureBuffer);
     
     if (targetTemp < 18) targetTemp = 18;
     if (targetTemp > 30) targetTemp = 30;
-
-    switch (targetHeatingCoolingState.value.uint8_value)
+    
+    switch (state)
     {
         case 0:
                 AC.off();
@@ -142,18 +143,20 @@ void homekitLoop()
         homekitNotify();
     }
 }
- 
+
 void setup()
 {
   //  homekit_storage_reset();
-    
+
     wifi_connect();
     AC.begin();
     DHTSensor.begin();
+
+
     pinMode(LEDpin, OUTPUT);
     digitalWrite(LEDpin, HIGH);
     /*Serial.begin(115200);*/
-    
+
     delay(1000);
     homekitSetup();
 }
