@@ -18,8 +18,6 @@
 #include <DHT.h>
 #include "wifi_info.h"
 
-/*#define LOG_D(fmt, ...)   printf_P(PSTR(fmt "\n") , ##__VA_ARGS__);*/
- 
 extern "C" homekit_server_config_t accessory_config;
 extern "C" homekit_characteristic_t currentHeatingCoolingState;
 extern "C" homekit_characteristic_t targetHeatingCoolingState;
@@ -89,15 +87,14 @@ void updateac()
                 digitalWrite(LEDpin, LOW);
             break;
         case 3:
-            if (currentTemperature.value.float_value > targetTemperature.value.float_value + 1.0) 
-            {
-                // AC.ensurePower(true), AC.setMode(kKelonModeCool);
-            }
-            else if (currentTemperature.value.float_value < targetTemperature.value.float_value - 1.0)
-            {
-              //AC.ensurePower(true), AC.setMode(kKelonModeHeat);
-            }
-         //   else AC.ensurePower(false);
+                AC.on();
+                AC.setSwing(kFujitsuAcSwingOff);
+                AC.setMode(kFujitsuAcModeAuto);
+                AC.setFanSpeed(kFujitsuAcFanQuiet);
+                AC.setTemp(targetTemp);
+                AC.setCmd(kFujitsuAcCmdTurnOn);
+                AC.send();
+                digitalWrite(LEDpin, LOW);            
             break;
     }
 
@@ -139,7 +136,7 @@ void homekitLoop()
     const uint32_t timer = millis();
     if (timer > nextNotifyTime)
     {
-        nextNotifyTime = timer + 2 * 1000;
+        nextNotifyTime = timer + 10 * 1000;
         homekitNotify();
     }
 }
@@ -152,10 +149,8 @@ void setup()
     AC.begin();
     DHTSensor.begin();
 
-
     pinMode(LEDpin, OUTPUT);
     digitalWrite(LEDpin, HIGH);
-    /*Serial.begin(115200);*/
 
     delay(1000);
     homekitSetup();
