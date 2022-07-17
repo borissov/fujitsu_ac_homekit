@@ -68,7 +68,6 @@ void updateac()
                 digitalWrite(LEDpin, HIGH);
             break;
         case 1:
-                digitalWrite(LEDpin, LOW);
                 AC.on();
                 AC.setSwing(kFujitsuAcSwingOff);
                 AC.setMode(kFujitsuAcModeHeat);
@@ -76,9 +75,9 @@ void updateac()
                 AC.setTemp(targetTemp);
                 AC.setCmd(kFujitsuAcCmdTurnOn);
                 AC.send();
+                digitalWrite(LEDpin, LOW);
             break;
         case 2:
-                digitalWrite(LEDpin, LOW);
                 AC.on();
                 AC.setSwing(kFujitsuAcSwingOff);
                 AC.setMode(kFujitsuAcModeCool);
@@ -86,6 +85,7 @@ void updateac()
                 AC.setTemp(targetTemp);
                 AC.setCmd(kFujitsuAcCmdTurnOn);
                 AC.send();
+                digitalWrite(LEDpin, LOW);
             break;
         case 3:
             if (currentTemperature.value.float_value > targetTemperature.value.float_value + 1.0) 
@@ -112,9 +112,9 @@ void ACTemperatureSetter(const homekit_value_t value)
 
 void homekitNotify()
 {
-    currentTemperature.value.float_value = (round(DHTSensor.readTemperature() * 10.0) / 10.0);
+    currentTemperature.value.float_value = (round(DHTSensor.readTemperature() * 10.0) / 10.0) -1;
     currentRelativeHumidity.value.float_value = round(DHTSensor.readHumidity()) * 1.0;
-    if (!(currentTemperature.value.float_value > 0 && currentTemperature.value.float_value < 100)) currentTemperature.value.float_value = 26.0;//如若不能给出正常的传感器数值,则会连接失败,下同
+    if (!(currentTemperature.value.float_value > 0 && currentTemperature.value.float_value < 100)) currentTemperature.value.float_value = 24.0;//fix for wrong sensor data
     if (!(currentRelativeHumidity.value.float_value > 0 || currentRelativeHumidity.value.float_value < 100)) currentRelativeHumidity.value.float_value = 50.0;
     homekit_characteristic_notify(&currentHeatingCoolingState, currentHeatingCoolingState.value);
     homekit_characteristic_notify(&targetHeatingCoolingState, targetHeatingCoolingState.value);
