@@ -51,12 +51,8 @@ void temperatureDisplayUnitSetter(const homekit_value_t value)
 
 void updateac()
 {
-    float targetTemperatureBuffer = targetTemperature.value.float_value;
-
     int state = round(targetHeatingCoolingState.value.uint8_value);
-
-    //cast and set max and min temperature like the original remote
-    int targetTemp = round(targetTemperatureBuffer);
+    int targetTemp = round(targetTemperature.value.float_value);
 
     switch (state)
     {
@@ -137,7 +133,12 @@ void homekitLoop()
     {
         nextNotifyTime = timer + 10 * 1000;
         homekitNotify();
-        LOG_D("Free heap: %d, HomeKit clients: %d", ESP.getFreeHeap(), arduino_homekit_connected_clients_count());
+        LOG_D(
+            "Free heap: %d, HomeKit clients: %d Uptime: %d s", 
+            ESP.getFreeHeap(), 
+            arduino_homekit_connected_clients_count(), 
+            int(timer/1000)
+        );
     }
 }
 
