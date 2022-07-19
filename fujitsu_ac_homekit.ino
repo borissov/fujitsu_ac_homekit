@@ -10,6 +10,7 @@
  * credits to https://blog.judgelight.xyz/2022/06/arduinoesp8266%E5%BC%80%E5%8F%91homekit%E5%85%A5%E9%97%A8%E6%8C%87%E5%8D%97/
  */
 
+
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
 #include <arduino_homekit_server.h> //fetch latest from gh
@@ -17,6 +18,7 @@
 #include <ir_Fujitsu.h>
 #include <DHT.h>
 #include "wifi_info.h"
+
 
 #define LOG_D(fmt, ...)   printf_P(PSTR(fmt "\n") , ##__VA_ARGS__);
 
@@ -107,14 +109,17 @@ void homekitNotify()
 {
     currentTemperature.value.float_value = (round(DHTSensor.readTemperature() * 10.0) / 10.0) -1;
     currentRelativeHumidity.value.float_value = round(DHTSensor.readHumidity()) * 1.0;
+    
     if (!(currentTemperature.value.float_value > 0 && currentTemperature.value.float_value < 100)) currentTemperature.value.float_value = 24.0;//fix for wrong sensor data
     if (!(currentRelativeHumidity.value.float_value > 0 || currentRelativeHumidity.value.float_value < 100)) currentRelativeHumidity.value.float_value = 50.0;
+    
     homekit_characteristic_notify(&currentHeatingCoolingState, currentHeatingCoolingState.value);
     homekit_characteristic_notify(&targetHeatingCoolingState, targetHeatingCoolingState.value);
-    homekit_characteristic_notify(&currentTemperature, currentTemperature.value);
     homekit_characteristic_notify(&targetTemperature, targetTemperature.value);
     homekit_characteristic_notify(&temperatureDisplayUnit, temperatureDisplayUnit.value);
-    homekit_characteristic_notify(&currentRelativeHumidity, currentRelativeHumidity.value);
+    //memory leak after this...
+    /*homekit_characteristic_notify(&currentTemperature, currentTemperature.value);*/
+    /*homekit_characteristic_notify(&currentRelativeHumidity, currentRelativeHumidity.value);*/
 }
 
 void homekitSetup()
@@ -131,7 +136,7 @@ void homekitLoop()
     const uint32_t timer = millis();
     if (timer > nextNotifyTime)
     {
-        nextNotifyTime = timer + 10 * 1000;
+        nextNotifyTime = timer + 2 * 1000;
         homekitNotify();
         LOG_D(
             "Free heap: %d, HomeKit clients: %d Uptime: %d s", 
