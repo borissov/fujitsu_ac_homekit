@@ -12,8 +12,8 @@
 
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
-#include <arduino_homekit_server.h>
-#include <IRremoteESP8266.h>
+#include <arduino_homekit_server.h> //fetch latest from gh
+#include <IRremoteESP8266.h> 
 #include <ir_Fujitsu.h>
 #include <DHT.h>
 #include "wifi_info.h"
