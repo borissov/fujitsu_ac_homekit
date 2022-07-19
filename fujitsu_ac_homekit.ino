@@ -118,8 +118,8 @@ void homekitNotify()
     homekit_characteristic_notify(&targetTemperature, targetTemperature.value);
     homekit_characteristic_notify(&temperatureDisplayUnit, temperatureDisplayUnit.value);
     //memory leak after this...
-    /*homekit_characteristic_notify(&currentTemperature, currentTemperature.value);*/
-    /*homekit_characteristic_notify(&currentRelativeHumidity, currentRelativeHumidity.value);*/
+    homekit_characteristic_notify(&currentTemperature, currentTemperature.value);
+    homekit_characteristic_notify(&currentRelativeHumidity, currentRelativeHumidity.value);
 }
 
 void homekitSetup()
