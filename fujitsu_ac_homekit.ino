@@ -30,6 +30,7 @@ extern "C" homekit_characteristic_t targetTemperature;
 extern "C" homekit_characteristic_t temperatureDisplayUnit;
 extern "C" homekit_characteristic_t currentRelativeHumidity;
 static long long nextNotifyTime = 0;
+static long long nextTempNotifyTime = 0;
 const int IRPin = 4; //d2.
 const int DHTPin = 5; //d1.
 const int LEDpin = 2; //led
@@ -107,16 +108,21 @@ void ACTemperatureSetter(const homekit_value_t value)
 
 void homekitNotify()
 {
+    homekit_characteristic_notify(&currentHeatingCoolingState, currentHeatingCoolingState.value);
+    homekit_characteristic_notify(&targetHeatingCoolingState, targetHeatingCoolingState.value);
+   
+    homekit_characteristic_notify(&targetTemperature, targetTemperature.value);
+    homekit_characteristic_notify(&temperatureDisplayUnit, temperatureDisplayUnit.value);
+}
+
+void homekitTempNotify()
+{
     currentTemperature.value.float_value = (round(DHTSensor.readTemperature() * 10.0) / 10.0) -1;
     currentRelativeHumidity.value.float_value = round(DHTSensor.readHumidity()) * 1.0;
     
     if (!(currentTemperature.value.float_value > 0 && currentTemperature.value.float_value < 100)) currentTemperature.value.float_value = 24.0;//fix for wrong sensor data
     if (!(currentRelativeHumidity.value.float_value > 0 || currentRelativeHumidity.value.float_value < 100)) currentRelativeHumidity.value.float_value = 50.0;
     
-    homekit_characteristic_notify(&currentHeatingCoolingState, currentHeatingCoolingState.value);
-    homekit_characteristic_notify(&targetHeatingCoolingState, targetHeatingCoolingState.value);
-    homekit_characteristic_notify(&targetTemperature, targetTemperature.value);
-    homekit_characteristic_notify(&temperatureDisplayUnit, temperatureDisplayUnit.value);
     //memory leak after this...
     homekit_characteristic_notify(&currentTemperature, currentTemperature.value);
     homekit_characteristic_notify(&currentRelativeHumidity, currentRelativeHumidity.value);
@@ -137,7 +143,19 @@ void homekitLoop()
     if (timer > nextNotifyTime)
     {
         nextNotifyTime = timer + 2 * 1000;
-        homekitNotify();
+        /*homekitNotify();*/
+        LOG_D(
+            "Free heap: %d, HomeKit clients: %d Uptime: %d s", 
+            ESP.getFreeHeap(), 
+            arduino_homekit_connected_clients_count(), 
+            int(timer/1000)
+        );
+    }
+
+    if (timer > nextTempNotifyTime)
+    {
+        nextTempNotifyTime = timer + 25 * 1000;
+        homekitTempNotify();
         LOG_D(
             "Free heap: %d, HomeKit clients: %d Uptime: %d s", 
             ESP.getFreeHeap(), 
@@ -149,8 +167,6 @@ void homekitLoop()
 
 void setup()
 {
-    //  homekit_storage_reset();
-
     wifi_connect();
     AC.begin();
     DHTSensor.begin();
