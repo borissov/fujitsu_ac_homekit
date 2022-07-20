@@ -7,13 +7,12 @@
  * ir led: TSAL6100 
  * temperature sensor: DHT11
  *
- * credits to https://blog.judgelight.xyz/2022/06/arduinoesp8266%E5%BC%80%E5%8F%91homekit%E5%85%A5%E9%97%A8%E6%8C%87%E5%8D%97/
  */
 
 
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
-#include <arduino_homekit_server.h> //fetch latest from gh
+#include <arduino_homekit_server.h>
 #include <IRremoteESP8266.h> 
 #include <ir_Fujitsu.h>
 #include <DHT.h>
@@ -110,7 +109,6 @@ void homekitNotify()
 {
     homekit_characteristic_notify(&currentHeatingCoolingState, currentHeatingCoolingState.value);
     homekit_characteristic_notify(&targetHeatingCoolingState, targetHeatingCoolingState.value);
-   
     homekit_characteristic_notify(&targetTemperature, targetTemperature.value);
     homekit_characteristic_notify(&temperatureDisplayUnit, temperatureDisplayUnit.value);
 }
@@ -120,10 +118,11 @@ void homekitTempNotify()
     currentTemperature.value.float_value = (round(DHTSensor.readTemperature() * 10.0) / 10.0) -1;
     currentRelativeHumidity.value.float_value = round(DHTSensor.readHumidity()) * 1.0;
     
-    if (!(currentTemperature.value.float_value > 0 && currentTemperature.value.float_value < 100)) currentTemperature.value.float_value = 24.0;//fix for wrong sensor data
-    if (!(currentRelativeHumidity.value.float_value > 0 || currentRelativeHumidity.value.float_value < 100)) currentRelativeHumidity.value.float_value = 50.0;
+    if (!(currentTemperature.value.float_value > 0 && currentTemperature.value.float_value < 100)) 
+        currentTemperature.value.float_value = 24.0;//fix for wrong sensor data
+    if (!(currentRelativeHumidity.value.float_value > 0 || currentRelativeHumidity.value.float_value < 100)) 
+        currentRelativeHumidity.value.float_value = 50.0;
     
-    //memory leak after this...
     homekit_characteristic_notify(&currentTemperature, currentTemperature.value);
     homekit_characteristic_notify(&currentRelativeHumidity, currentRelativeHumidity.value);
 }
@@ -184,3 +183,4 @@ void loop()
     homekitLoop();
     delay(10);
 }
+
