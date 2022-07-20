@@ -7,11 +7,12 @@
  * ir led: TSAL6100 
  * temperature sensor: DHT11
  *
+ * credits to https://blog.judgelight.xyz/2022/06/arduinoesp8266%E5%BC%80%E5%8F%91homekit%E5%85%A5%E9%97%A8%E6%8C%87%E5%8D%97/
+ *
  */
 
 
 #include <Arduino.h>
-#include <ESP8266WiFi.h>
 #include <arduino_homekit_server.h>
 #include <IRremoteESP8266.h> 
 #include <ir_Fujitsu.h>
@@ -40,23 +41,44 @@ DHT DHTSensor(DHTPin, DHT11);
 
 void ACModeSetter(const homekit_value_t value)
 {
-    currentHeatingCoolingState.value.uint8_value = value.uint8_value;
-    targetHeatingCoolingState.value.uint8_value = value.uint8_value;
+    if(currentHeatingCoolingState.value.uint8_value != value.uint8_value)
+    {
+        currentHeatingCoolingState.value.uint8_value = value.uint8_value;
+        homekit_characteristic_notify(&currentHeatingCoolingState, currentHeatingCoolingState.value);
+    }
+    if(targetHeatingCoolingState.value.uint8_value != value.uint8_value)
+    {
+        targetHeatingCoolingState.value.uint8_value = value.uint8_value;
+        homekit_characteristic_notify(&targetHeatingCoolingState, targetHeatingCoolingState.value);
+    }
     updateac();
 }
 
+void ACTemperatureSetter(const homekit_value_t value)
+{
+    if(targetTemperature.value.float_value != value.float_value)
+    {
+        targetTemperature.value.float_value = value.float_value;
+        homekit_characteristic_notify(&targetTemperature, targetTemperature.value);
+        updateac();
+    }
+}
+
+
 void temperatureDisplayUnitSetter(const homekit_value_t value)
 {
-    temperatureDisplayUnit.value.uint8_value = value.uint8_value;
-    homekitNotify();
+    if(temperatureDisplayUnit.value.uint8_value != value.uint8_value)
+    {
+        temperatureDisplayUnit.value.uint8_value = value.uint8_value;
+        homekit_characteristic_notify(&temperatureDisplayUnit, temperatureDisplayUnit.value);
+    }
 }
 
 void updateac()
 {
-    int state = round(targetHeatingCoolingState.value.uint8_value);
-    int targetTemp = round(targetTemperature.value.float_value);
+    const int targetTemp = round(targetTemperature.value.float_value);
 
-    switch (state)
+    switch (targetHeatingCoolingState.value.uint8_value)
     {
         case 0:
             AC.off();
@@ -96,35 +118,30 @@ void updateac()
     }
 
     LOG_D("AC settings: %s", AC.toString().c_str());
-    homekitNotify();
 }
 
-void ACTemperatureSetter(const homekit_value_t value)
-{
-    targetTemperature.value.float_value = value.float_value;
-    updateac();
-}
-
-void homekitNotify()
-{
-    homekit_characteristic_notify(&currentHeatingCoolingState, currentHeatingCoolingState.value);
-    homekit_characteristic_notify(&targetHeatingCoolingState, targetHeatingCoolingState.value);
-    homekit_characteristic_notify(&targetTemperature, targetTemperature.value);
-    homekit_characteristic_notify(&temperatureDisplayUnit, temperatureDisplayUnit.value);
-}
 
 void homekitTempNotify()
 {
-    currentTemperature.value.float_value = (round(DHTSensor.readTemperature() * 10.0) / 10.0) -1;
-    currentRelativeHumidity.value.float_value = round(DHTSensor.readHumidity()) * 1.0;
+    float newTemperature = DHTSensor.readTemperature() -1;
+    float newHumidity = DHTSensor.readHumidity();
     
-    if (!(currentTemperature.value.float_value > 0 && currentTemperature.value.float_value < 100)) 
-        currentTemperature.value.float_value = 24.0;//fix for wrong sensor data
-    if (!(currentRelativeHumidity.value.float_value > 0 || currentRelativeHumidity.value.float_value < 100)) 
-        currentRelativeHumidity.value.float_value = 50.0;
-    
-    homekit_characteristic_notify(&currentTemperature, currentTemperature.value);
-    homekit_characteristic_notify(&currentRelativeHumidity, currentRelativeHumidity.value);
+    if (!(newTemperature > 0 && newTemperature < 100)) 
+        newTemperature = 24.0;
+    if (!(newHumidity > 0 && newHumidity < 100)) 
+        newHumidity = 50.0;
+
+    if (currentTemperature.value.float_value != newTemperature)
+    {
+        currentTemperature.value.float_value = newTemperature;
+        homekit_characteristic_notify(&currentTemperature, currentTemperature.value);
+    }
+
+    if (currentRelativeHumidity.value.float_value != newHumidity)
+    {
+        currentRelativeHumidity.value.float_value = newHumidity;
+        homekit_characteristic_notify(&currentRelativeHumidity, currentRelativeHumidity.value);
+    }
 }
 
 void homekitSetup()
@@ -142,7 +159,6 @@ void homekitLoop()
     if (timer > nextNotifyTime)
     {
         nextNotifyTime = timer + 2 * 1000;
-        /*homekitNotify();*/
         LOG_D(
             "Free heap: %d, HomeKit clients: %d Uptime: %d s", 
             ESP.getFreeHeap(), 
@@ -183,4 +199,3 @@ void loop()
     homekitLoop();
     delay(10);
 }
-
