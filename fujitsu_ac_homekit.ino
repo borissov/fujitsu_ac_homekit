@@ -1,19 +1,6 @@
-/*
- * HomeKit Remote control for old Fujitsu AC via Infrared
- * 
- * hadware list:
- * controller: NodeMCU v2
- * transistor: BC547 
- * ir led: TSAL6100 
- * temperature sensor: DHT11
- *
- * credits to https://blog.judgelight.xyz/2022/06/arduinoesp8266%E5%BC%80%E5%8F%91homekit%E5%85%A5%E9%97%A8%E6%8C%87%E5%8D%97/
- *
- */
-
-
 #include <Arduino.h>
 #include <arduino_homekit_server.h>
+#include <homekit/characteristics.h>
 #include <IRremoteESP8266.h> 
 #include <ir_Fujitsu.h>
 #include <DHT.h>
@@ -80,12 +67,12 @@ void updateac()
 
     switch (targetHeatingCoolingState.value.uint8_value)
     {
-        case 0:
+        case HOMEKIT_TARGET_HEATING_COOLING_STATE_OFF:
             AC.off();
             AC.send();
             digitalWrite(LEDpin, HIGH);
             break;
-        case 1:
+        case HOMEKIT_TARGET_HEATING_COOLING_STATE_HEAT:
             AC.on();
             AC.setSwing(kFujitsuAcSwingOff);
             AC.setMode(kFujitsuAcModeHeat);
@@ -95,7 +82,7 @@ void updateac()
             AC.send();
             digitalWrite(LEDpin, LOW);
             break;
-        case 2:
+        case HOMEKIT_TARGET_HEATING_COOLING_STATE_COOL:
             AC.on();
             AC.setSwing(kFujitsuAcSwingOff);
             AC.setMode(kFujitsuAcModeCool);
@@ -105,7 +92,7 @@ void updateac()
             AC.send();
             digitalWrite(LEDpin, LOW);
             break;
-        case 3:
+        case HOMEKIT_TARGET_HEATING_COOLING_STATE_AUTO:
             AC.on();
             AC.setSwing(kFujitsuAcSwingOff);
             AC.setMode(kFujitsuAcModeAuto);
