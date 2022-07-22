@@ -24,7 +24,7 @@ homekit_accessory_t *accessories[] = {
         HOMEKIT_SERVICE(ACCESSORY_INFORMATION, .characteristics = (homekit_characteristic_t*[]) {
             HOMEKIT_CHARACTERISTIC(NAME, "Fujitsu_AC"),
             HOMEKIT_CHARACTERISTIC(MANUFACTURER, "Fujitsu"),
-            HOMEKIT_CHARACTERISTIC(SERIAL_NUMBER, "111111111"),
+            HOMEKIT_CHARACTERISTIC(SERIAL_NUMBER, "0123456"),
             HOMEKIT_CHARACTERISTIC(MODEL, "RB Script"),
             HOMEKIT_CHARACTERISTIC(FIRMWARE_REVISION, "1.0"),
             HOMEKIT_CHARACTERISTIC(IDENTIFY, my_accessory_identify),
