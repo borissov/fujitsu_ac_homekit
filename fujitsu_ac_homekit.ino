@@ -98,7 +98,7 @@ void updateac()
             AC.on();
             AC.setSwing(kFujitsuAcSwingOff);
             AC.setMode(kFujitsuAcModeHeat);
-            AC.setFanSpeed(kFujitsuAcFanQuiet);
+            AC.setFanSpeed(kFujitsuAcFanAuto);//kFujitsuAcFanQuiet
             AC.setTemp(targetTemp);
             AC.setCmd(kFujitsuAcCmdTurnOn);
             AC.send();
@@ -108,7 +108,7 @@ void updateac()
             AC.on();
             AC.setSwing(kFujitsuAcSwingOff);
             AC.setMode(kFujitsuAcModeCool);
-            AC.setFanSpeed(kFujitsuAcFanQuiet);
+            AC.setFanSpeed(kFujitsuAcFanAuto);//kFujitsuAcFanQuiet
             AC.setTemp(targetTemp);
             AC.setCmd(kFujitsuAcCmdTurnOn);
             AC.send();
@@ -118,7 +118,7 @@ void updateac()
             AC.on();
             AC.setSwing(kFujitsuAcSwingOff);
             AC.setMode(kFujitsuAcModeAuto);
-            AC.setFanSpeed(kFujitsuAcFanQuiet);
+            AC.setFanSpeed(kFujitsuAcFanAuto);//kFujitsuAcFanQuiet
             AC.setTemp(targetTemp);
             AC.setCmd(kFujitsuAcCmdTurnOn);
             AC.send();
